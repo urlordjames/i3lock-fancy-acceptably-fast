@@ -1,8 +1,9 @@
 use xcb::x;
 use std::io::Write;
 
-const KERNEL_SRC: &str = include_str!("kernel.cl");
-const ITERATIONS: u8 = 4;
+const KERNEL_X_SRC: &str = include_str!("kernelx.cl");
+const KERNEL_Y_SRC: &str = include_str!("kernely.cl");
+const ITERATIONS: u16 = 4;
 
 fn main() {
 	let (conn, screen_num) = xcb::Connection::connect(None).unwrap();
@@ -27,8 +28,13 @@ fn main() {
 	let device = ctx.devices()[0];
 	let queue = ocl::Queue::new(&ctx, device, None).unwrap();
 
-	let program = ocl::Program::builder()
-		.src(KERNEL_SRC)
+	let program_x = ocl::Program::builder()
+		.src(KERNEL_X_SRC)
+		.devices(device)
+		.build(&ctx).unwrap();
+
+	let program_y = ocl::Program::builder()
+		.src(KERNEL_Y_SRC)
 		.devices(device)
 		.build(&ctx).unwrap();
 
@@ -58,25 +64,27 @@ fn main() {
 		.queue(queue.clone())
 		.build().unwrap();
 
-	for i in 0..=ITERATIONS {
-		let mut kernel_builder = ocl::Kernel::builder();
-		kernel_builder.program(&program);
-		kernel_builder.name("box_blur");
-		kernel_builder.queue(queue.clone());
-		kernel_builder.global_work_size(img_dims);
+	for program in [program_x, program_y] {
+		for i in 0..=ITERATIONS {
+			let mut kernel_builder = ocl::Kernel::builder();
+			kernel_builder.program(&program);
+			kernel_builder.name("box_blur");
+			kernel_builder.queue(queue.clone());
+			kernel_builder.global_work_size(img_dims);
 
-		// scuffed double buffering
-		if i % 2 == 0 {
-			kernel_builder.arg(&img_in);
-			kernel_builder.arg(&img_out);
-		} else {
-			kernel_builder.arg(&img_out);
-			kernel_builder.arg(&img_in);
-		}
+			// scuffed double buffering
+			if i % 2 == 0 {
+				kernel_builder.arg(&img_in);
+				kernel_builder.arg(&img_out);
+			} else {
+				kernel_builder.arg(&img_out);
+				kernel_builder.arg(&img_in);
+			}
 
-		let kernel = kernel_builder.build().unwrap();
-		unsafe {
-			kernel.enq().unwrap();
+			let kernel = kernel_builder.build().unwrap();
+			unsafe {
+				kernel.enq().unwrap();
+			}
 		}
 	}
 

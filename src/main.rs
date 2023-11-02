@@ -1,8 +1,7 @@
 use xcb::x;
 use std::io::Write;
 
-const KERNEL_X_SRC: &str = include_str!("kernelx.cl");
-const KERNEL_Y_SRC: &str = include_str!("kernely.cl");
+const KERNEL_SRC: &str = include_str!("kernel.cl");
 const ITERATIONS: u16 = 4;
 
 fn main() {
@@ -28,13 +27,8 @@ fn main() {
 	let device = ctx.devices()[0];
 	let queue = ocl::Queue::new(&ctx, device, None).unwrap();
 
-	let program_x = ocl::Program::builder()
-		.src(KERNEL_X_SRC)
-		.devices(device)
-		.build(&ctx).unwrap();
-
-	let program_y = ocl::Program::builder()
-		.src(KERNEL_Y_SRC)
+	let program = ocl::Program::builder()
+		.src(KERNEL_SRC)
 		.devices(device)
 		.build(&ctx).unwrap();
 
@@ -64,11 +58,11 @@ fn main() {
 		.queue(queue.clone())
 		.build().unwrap();
 
-	for program in [program_x, program_y] {
+	for program_name in ["box_blur_x", "box_blur_y"] {
 		for i in 0..=ITERATIONS {
 			let mut kernel_builder = ocl::Kernel::builder();
 			kernel_builder.program(&program);
-			kernel_builder.name("box_blur");
+			kernel_builder.name(program_name);
 			kernel_builder.queue(queue.clone());
 			kernel_builder.global_work_size(img_dims);
 

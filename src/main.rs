@@ -2,7 +2,6 @@ use xcb::x;
 use std::io::Write;
 
 const KERNEL_SRC: &str = include_str!("kernel.cl");
-const ITERATIONS: u16 = 4;
 
 fn main() {
 	let (conn, screen_num) = xcb::Connection::connect(None).unwrap();
@@ -59,31 +58,29 @@ fn main() {
 		.build().unwrap();
 
 	for program_name in ["box_blur_x", "box_blur_y"] {
-		for i in 0..=ITERATIONS {
-			let mut kernel_builder = ocl::Kernel::builder();
-			kernel_builder.program(&program);
-			kernel_builder.name(program_name);
-			kernel_builder.queue(queue.clone());
-			kernel_builder.global_work_size(img_dims);
+		let mut kernel_builder = ocl::Kernel::builder();
+		kernel_builder.program(&program);
+		kernel_builder.name(program_name);
+		kernel_builder.queue(queue.clone());
+		kernel_builder.global_work_size(img_dims);
 
-			// scuffed double buffering
-			if i % 2 == 0 {
-				kernel_builder.arg(&img_in);
-				kernel_builder.arg(&img_out);
-			} else {
-				kernel_builder.arg(&img_out);
-				kernel_builder.arg(&img_in);
-			}
+		// scuffed double buffering
+		if program_name == "box_blur_x" {
+			kernel_builder.arg(&img_in);
+			kernel_builder.arg(&img_out);
+		} else {
+			kernel_builder.arg(&img_out);
+			kernel_builder.arg(&img_in);
+		}
 
-			let kernel = kernel_builder.build().unwrap();
-			unsafe {
-				kernel.enq().unwrap();
-			}
+		let kernel = kernel_builder.build().unwrap();
+		unsafe {
+			kernel.enq().unwrap();
 		}
 	}
 
 	let mut img = vec![0; width as usize * height as usize * 4];
-	img_out.read(&mut img).enq().unwrap();
+	img_in.read(&mut img).enq().unwrap();
 	queue.finish().unwrap();
 
 	let mut i3lock = std::process::Command::new("i3lock")

@@ -1,8 +1,8 @@
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 // sigma = (17/2pi)
-__constant float gauss[] = {0.0018629616, 0.0051897927, 0.012611598, 0.026734004, 0.049434684, 0.07973947, 0.11219893, 0.13771395, 0.14744873, 0.13771395, 0.11219893, 0.07973947, 0.049434684, 0.026734004, 0.012611598, 0.0051897927, 0.0018629616};
+__constant float gauss[] = {0.0018629616f, 0.0051897927f, 0.012611598f, 0.026734004f, 0.049434684f, 0.07973947f, 0.11219893f, 0.13771395f, 0.14744873f, 0.13771395f, 0.11219893f, 0.07973947f, 0.049434684f, 0.026734004f, 0.012611598f, 0.0051897927f, 0.0018629616f};
 
-__kernel void box_blur_x(read_only image2d_t img_in, write_only image2d_t out_img) {
+__kernel void box_blur_x(read_only image2d_t img_in, write_only image2d_t img_out) {
 	int2 pos = (int2)(get_global_id(0), get_global_id(1));
 
 	float4 pixel = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
@@ -12,10 +12,10 @@ __kernel void box_blur_x(read_only image2d_t img_in, write_only image2d_t out_im
 		pixel += sample * gauss[i + 8];
 	}
 
-	write_imagef(out_img, pos, pixel);
+	write_imagef(img_out, pos, pixel);
 }
 
-__kernel void box_blur_y(read_only image2d_t img_in, write_only image2d_t out_img) {
+__kernel void box_blur_y(write_only image2d_t img_out, read_only image2d_t img_in) {
 	int2 pos = (int2)(get_global_id(0), get_global_id(1));
 
 	float4 pixel = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
@@ -25,5 +25,5 @@ __kernel void box_blur_y(read_only image2d_t img_in, write_only image2d_t out_im
 		pixel += sample * gauss[i + 8];
 	}
 
-	write_imagef(out_img, pos, pixel);
+	write_imagef(img_out, pos, pixel);
 }

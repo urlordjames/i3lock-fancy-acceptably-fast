@@ -63,15 +63,8 @@ fn main() {
 		kernel_builder.name(program_name);
 		kernel_builder.queue(queue.clone());
 		kernel_builder.global_work_size(img_dims);
-
-		// scuffed double buffering
-		if program_name == "box_blur_x" {
-			kernel_builder.arg(&img_in);
-			kernel_builder.arg(&img_out);
-		} else {
-			kernel_builder.arg(&img_out);
-			kernel_builder.arg(&img_in);
-		}
+		kernel_builder.arg(&img_in);
+		kernel_builder.arg(&img_out);
 
 		let kernel = kernel_builder.build().unwrap();
 		unsafe {

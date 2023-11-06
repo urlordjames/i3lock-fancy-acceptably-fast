@@ -55,7 +55,7 @@ fn main() {
 		.queue(queue.clone())
 		.build().unwrap();
 
-	for program_name in ["box_blur_x", "box_blur_y"] {
+	for program_name in ["gauss_blur_x", "gauss_blur_y"] {
 		let mut kernel_builder = ocl::Kernel::builder();
 		kernel_builder.program(&program);
 		kernel_builder.name(program_name);

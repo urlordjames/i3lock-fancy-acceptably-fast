@@ -1,7 +1,8 @@
 use xcb::x;
 use std::io::Write;
 
-const KERNEL_SRC: &str = include_str!("kernel.cl");
+mod caching;
+use caching::get_program_cached;
 
 fn main() {
 	let (conn, screen_num) = xcb::Connection::connect(None).unwrap();
@@ -26,10 +27,7 @@ fn main() {
 	let device = ctx.devices()[0];
 	let queue = ocl::Queue::new(&ctx, device, None).unwrap();
 
-	let program = ocl::Program::builder()
-		.src(KERNEL_SRC)
-		.devices(device)
-		.build(&ctx).unwrap();
+	let program = get_program_cached(device, &ctx);
 
 	let img_dims = ocl::SpatialDims::Two(width as usize, height as usize);
 

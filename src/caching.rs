@@ -1,5 +1,5 @@
 const KERNEL_SRC: &str = include_str!("kernel.cl");
-const KERNEL_VERSION: &str = "1";
+const KERNEL_VERSION: &str = "2";
 
 pub fn get_program_cached(device: ocl::Device, ctx: &ocl::Context) -> ocl::Program {
 	let home = std::path::PathBuf::from(std::env::var("HOME").unwrap());

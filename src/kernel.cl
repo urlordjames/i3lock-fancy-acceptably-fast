@@ -6,7 +6,7 @@ __constant float gauss[] = {0.0007954424, 0.0014431258, 0.0025128035, 0.00419925
 __kernel void gauss_blur_x(read_only image2d_t img_in, write_only image2d_t img_out) {
 	int2 pos = (int2)(get_global_id(0), get_global_id(1));
 
-	float4 pixel = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 pixel = 0.0f;
 
 	for (int i = -radius; i <= radius; i++) {
 		float4 sample = read_imagef(img_in, sampler, pos + (int2)(i, 0));
@@ -19,7 +19,7 @@ __kernel void gauss_blur_x(read_only image2d_t img_in, write_only image2d_t img_
 __kernel void gauss_blur_y(write_only image2d_t img_out, read_only image2d_t img_in) {
 	int2 pos = (int2)(get_global_id(0), get_global_id(1));
 
-	float4 pixel = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 pixel = 0.0f;
 
 	for (int i = -radius; i <= radius; i++) {
 		float4 sample = read_imagef(img_in, sampler, pos + (int2)(0, i));

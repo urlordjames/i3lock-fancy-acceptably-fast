@@ -8,7 +8,7 @@ fn main() {
 	let (conn, screen_num) = xcb::Connection::connect(None).unwrap();
 	let setup = conn.get_setup();
 	let screen = setup.roots().nth(screen_num as usize).unwrap();
-	
+
 	let (width, height) = (screen.width_in_pixels(), screen.height_in_pixels());
 
 	let cookie = conn.send_request(&x::GetImage {
@@ -45,7 +45,7 @@ fn main() {
 		.queue(queue.clone())
 		.copy_host_slice(screen)
 		.build().unwrap();
-	
+
 	let img_out = ocl::Image::<u8>::builder()
 		.channel_order(ocl::enums::ImageChannelOrder::Bgra)
 		.channel_data_type(ocl::enums::ImageChannelDataType::UnormInt8)

@@ -7,4 +7,4 @@ license = "GPL-3.0+"
 
 [dependencies]
 ocl = "0.19"
-xcb = "1.2"
+xcb = "1.3"

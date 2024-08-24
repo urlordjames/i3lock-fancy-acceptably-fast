@@ -75,7 +75,7 @@ fn main() {
 	queue.finish().unwrap();
 
 	let mut i3lock = std::process::Command::new("i3lock")
-		.args(["--raw=1920x1080:bgrx", "--image", "/dev/stdin", "-f"])
+		.args(["--raw=1920x1080:bgrx", "--image", "/dev/stdin", "-f", "--nofork"])
 		.stdin(std::process::Stdio::piped())
 		.spawn().unwrap();
 	let i3lock_stdin = i3lock.stdin.as_mut().unwrap();
